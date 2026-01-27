@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>피스냥</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <h1>피스냥</h1>
+      <button id="refresh">새로고침</button>
+    </header>
+    <section class="controls">
+      <button id="start">시작</button>
+      <button id="pause">일시 정지</button>
+      <button id="stop">종료</button>
+      <button id="reset">초기화</button>
+      <span id="status" class="muted"></span>
+    </section>
+    <section>
+      <h2>최근 방문한 도메인</h2>
+      <ul id="domains"></ul>
+    </section>
+    <section>
+      <h2>최근 활동</h2>
+      <ul id="events"></ul>
+    </section>
+    <script src="popup.js"></script>
+  </body>
+</html>
