@@ -3,7 +3,7 @@
   "name": "Scam Exposure Monitor",
   "version": "0.1.0",
   "description": "Real-time scam/phishing exposure signals for Chrome browsing.",
-  "permissions": ["storage", "tabs", "activeTab", "scripting"],
+  "permissions": ["storage", "tabs", "activeTab", "scripting", "downloads"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js",

@@ -2,7 +2,7 @@ const API_BASE = "http://localhost:8000";
 const EVENTS_KEY = "events";
 const DOMAINS_KEY = "domains";
 const MONITORING_KEY = "monitoring";
-const MAX_EVENTS = 50;
+const MAX_EVENTS = 100;
 const MAX_DOMAINS = 50;
 
 let monitoringState = "running";
@@ -106,4 +106,38 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status !== "complete" || !tab?.url) return;
   if (monitoringState !== "running") return;
   addDomain(tab.url);
+});
+
+function safeHostname(url) {
+  try { return new URL(url).hostname; } catch { return url || ""; }
+}
+
+async function pushEvent(ev) {
+  const { [EVENTS_KEY]: events = [], [DOMAINS_KEY]: domains = [] } =
+    await chrome.storage.local.get([EVENTS_KEY, DOMAINS_KEY]);
+
+  const nextEvents = [ev, ...events].slice(0, MAX_EVENTS);
+
+  const host = safeHostname(ev.url);
+  const nextDomains = host
+    ? [host, ...domains.filter(d => d !== host)].slice(0, MAX_DOMAINS)
+    : domains;
+
+  await chrome.storage.local.set({
+    [EVENTS_KEY]: nextEvents,
+    [DOMAINS_KEY]: nextDomains,
+  });
+}
+
+chrome.downloads.onCreated.addListener(async (item) => {
+  const url = item.finalUrl || item.url || "";
+  const filename = item.filename ? item.filename.split(/[\\/]/).pop() : "";
+
+  await pushEvent({
+    type: "download",
+    ts: new Date().toISOString(),
+    url,
+    meta: { filename },
+    reasons: ["download_started"],
+  });
 });

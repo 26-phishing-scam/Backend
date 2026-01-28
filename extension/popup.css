@@ -79,7 +79,7 @@ ul {
   margin: 0;
 }
 
-li {
+.list-item {
   background: #ffffff;
   border: 1px solid #e0e0e0;
   border-radius: 6px;
@@ -88,6 +88,30 @@ li {
   font-size: 12px;
 }
 
+.event-container {
+  margin-bottom: 6px;
+}
+
 .muted {
   color: #666666;
+}
+
+.event-item {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+}
+
+.event-item summary {
+  cursor: pointer;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.event-details {
+  padding: 0 8px 8px;
+  font-size: 12px;
+  color: #444444;
+  display: grid;
+  gap: 4px;
 }
