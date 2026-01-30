@@ -109,6 +109,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         ts: new Date().toISOString(),
         type: payload.type,
         url,
+        meta: payload.meta ?? null,
         reasons: result.reasons ?? [],
         ok: true,
       });
@@ -119,6 +120,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         ts: new Date().toISOString(),
         type: payload.type,
         url,
+        meta: payload.meta ?? null,
         reasons: ["api_unavailable"],
         ok: false,
       });

@@ -12,6 +12,18 @@
 const PII_KEYWORDS = [
   "name",
   "account",
+  "username",
+  "userid",
+  "user id",
+  "user_id",
+  "user-id",
+  "login",
+  "loginid",
+  "login id",
+  "login-id",
+  "password",
+  "passwd",
+  "pwd",
   "email",
   "phone",
   "tel",
@@ -73,6 +85,51 @@ const PII_AUTOCOMPLETE = [
   "bday-day",
   "bday-month",
   "bday-year",
+];
+
+// ---------- Credential autocomplete/keywords ----------
+// Used to avoid misclassifying login fields as payment.
+const CREDENTIAL_AUTOCOMPLETE = ["username", "current-password", "new-password"];
+const CREDENTIAL_KEYWORDS = [
+  "username",
+  "userid",
+  "user id",
+  "user_id",
+  "user-id",
+  "login",
+  "loginid",
+  "login id",
+  "login-id",
+  "password",
+  "passwd",
+  "pwd",
+  "아이디",
+  "로그인",
+  "계정",
+];
+
+// ---------- ID/phone hint keywords ----------
+// Used to disambiguate "아이디 또는 전화번호" style fields.
+const ID_HINT_KEYWORDS = [
+  "아이디",
+  "로그인",
+  "계정",
+  "username",
+  "userid",
+  "user id",
+  "login",
+  "login id",
+  "account",
+];
+const PHONE_HINT_KEYWORDS = [
+  "전화번호",
+  "휴대폰",
+  "핸드폰",
+  "phone",
+  "tel",
+  "mobile",
+  "cell",
+  "hp",
 ];
 
 // ---------- 결제(PAYMENT) 키워드 목록 ----------
@@ -228,6 +285,63 @@ function getAutocomplete(el) {
   return normalizeText(el?.getAttribute("autocomplete"));
 }
 
+// ---------- Credential field guard ----------
+// Prevents login fields from being classified as payment inputs.
+function isCredentialField(el, text, autocomplete) {
+  const inputType = normalizeText(el?.getAttribute("type"));
+  if (inputType === "password") return true;
+  if (autocomplete && CREDENTIAL_AUTOCOMPLETE.some((key) => autocomplete.startsWith(key))) {
+    return true;
+  }
+  return CREDENTIAL_KEYWORDS.some((kw) => text.includes(kw));
+}
+
+function hasKeyword(text, keywords) {
+  return keywords.some((kw) => text.includes(kw));
+}
+
+function getIdPhoneHints(text) {
+  const hasId = hasKeyword(text, ID_HINT_KEYWORDS);
+  const hasPhone = hasKeyword(text, PHONE_HINT_KEYWORDS);
+  return { hasId, hasPhone, ambiguous: hasId && hasPhone };
+}
+
+// ---------- Value-based PII hint ----------
+// Infers what the user typed without sending the raw value.
+function inferValueKindsFromInput(el, text, autocomplete) {
+  const value = (el?.value ?? "").toString().trim();
+  if (!value) return [];
+
+  const kinds = [];
+  const inputType = normalizeText(el?.getAttribute("type"));
+
+  // Passwords: short-circuit to avoid mislabeling
+  if (inputType === "password" || autocomplete === "current-password" || autocomplete === "new-password") {
+    return ["password"];
+  }
+
+  const lower = value.toLowerCase();
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lower);
+  if (isEmail) kinds.push("email");
+
+  const digits = value.replace(/\D/g, "");
+  const looksLikeKrPhone = /^(0\d{9,10}|82\d{9,10})$/.test(digits);
+  if (looksLikeKrPhone) kinds.push("phone");
+
+  if (!kinds.length) {
+    const hasAlpha = /[a-z]/i.test(value);
+    const hasDigit = /\d/.test(value);
+    const hints = getIdPhoneHints(text);
+    if (hasAlpha || hasDigit) {
+      if (isCredentialField(el, text, autocomplete) || hints.hasId || hints.ambiguous) {
+        kinds.push("username");
+      }
+    }
+  }
+
+  return kinds;
+}
+
 // ---------- 이벤트 중복 전송 제한 ----------
 // 같은 요소(sourceEl)에서 같은 type 이벤트가 EVENT_COOLDOWN_MS 내에 반복되면 전송하지 않음
 function shouldSend(el, type) {
@@ -281,6 +395,13 @@ async function sendEvent(type, meta, sourceEl) {
 function detectPaymentFromField(el) {
   const text = fieldText(el);
   const autocomplete = getAutocomplete(el);
+  const inputType = normalizeText(el?.getAttribute("type"));
+  if (inputType === "hidden" || inputType === "submit" || inputType === "button" || inputType === "image") {
+    return null;
+  }
+  if (isCredentialField(el, text, autocomplete)) {
+    return null;
+  }
   const hits = matchKeywords(text, PAYMENT_KEYWORDS);
 
   // (1) autocomplete이 cc-* 계열이면 결제 입력으로 강하게 확정
@@ -290,7 +411,6 @@ function detectPaymentFromField(el) {
   }
 
   // (2) type이 number/tel인데 maxlength가 12~19면 카드번호 가능성이 있어 힌트 추가
-  const inputType = normalizeText(el?.getAttribute("type"));
   if (inputType === "number" || inputType === "tel") {
     const maxLength = Number.parseInt(el?.getAttribute("maxlength") || "", 10);
     if (!Number.isNaN(maxLength) && maxLength >= 12 && maxLength <= 19) {
@@ -312,22 +432,32 @@ function detectPiiFromField(el) {
   const text = fieldText(el);
   const autocomplete = getAutocomplete(el);
   const hits = matchKeywords(text, PII_KEYWORDS);
+  const valueKinds = inferValueKindsFromInput(el, text, autocomplete);
 
   // (1) input type 자체가 email/tel이면 개인정보 가능성 힌트 추가
   const inputType = normalizeText(el?.getAttribute("type"));
   if (inputType === "email") uniquePush(hits, "email");
   if (inputType === "tel") uniquePush(hits, "phone");
+  if (inputType === "password") uniquePush(hits, "password");
 
   // (2) autocomplete 표준 값이 있으면 힌트 추가
   if (autocomplete) {
     PII_AUTOCOMPLETE.forEach((key) => {
       if (autocomplete.startsWith(key)) uniquePush(hits, key);
     });
+    if (autocomplete === "username") uniquePush(hits, "username");
+    if (autocomplete === "current-password" || autocomplete === "new-password") {
+      uniquePush(hits, "password");
+    }
   }
 
   // (3) 키워드 히트가 하나라도 있으면 개인정보로 분류
-  if (hits.length) {
-    return { fields: hits, trigger: "keyword" };
+  if (hits.length || valueKinds.length) {
+    return {
+      fields: hits,
+      valueKinds,
+      trigger: hits.length ? "keyword" : "value_hint",
+    };
   }
 
   return null;

@@ -304,10 +304,24 @@ function piiFieldLabel(raw) {
   return null;
 }
 
+// ---------- meta.valueKinds -> label ----------
+// valueKinds? ??? ??? ???? ? ??(?? ?? ???? ??)
+function piiValueKindLabel(raw) {
+  return piiFieldLabel(raw);
+}
+
+
 // ---------- event.meta.fields -> 라벨 배열로 추정 ----------
 // content.js가 meta.fields에 담아준 키워드 배열을 받아
 // piiFieldLabel로 변환 -> 중복 제거 -> ["아이디","비밀번호"] 형태로 반환
 function inferPiiKinds(event) {
+  const valueKinds = Array.isArray(event?.meta?.valueKinds) ? event.meta.valueKinds : [];
+  if (valueKinds.length) {
+    const valueLabels = valueKinds.map(piiValueKindLabel).filter(Boolean);
+    if (valueLabels.length) return [...new Set(valueLabels)];
+  }
+
+
   const fields = Array.isArray(event?.meta?.fields) ? event.meta.fields : [];
   const labels = [];
 
