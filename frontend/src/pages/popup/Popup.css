@@ -177,3 +177,19 @@
 .report-btn:active {
   transform: scale(0.95);
 }
+
+
+/* === 커스텀 스크롤바 (팝업용) === */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #d6d3d1;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #a8a29e;
+}
