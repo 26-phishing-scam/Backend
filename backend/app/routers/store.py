@@ -1,0 +1,43 @@
+from datetime import datetime
+
+from fastapi import APIRouter
+
+from ..models import DomainIn, StoredEvent
+from ..services.storage import build_summary, get_domains, get_events, push_domain, push_event
+
+router = APIRouter()
+
+
+@router.post("/events")
+async def store_event(ev: StoredEvent):
+    item = {
+        "ts": ev.ts.isoformat(),
+        "type": ev.type,
+        "url": str(ev.url),
+        "meta": ev.meta,
+        "reasons": ev.reasons or [],
+        "ok": ev.ok,
+    }
+    push_event(item)
+    return {"ok": True}
+
+
+@router.get("/events")
+async def list_events(limit: int = 100):
+    return {"events": get_events(limit)}
+
+
+@router.post("/domains")
+async def store_domain(payload: DomainIn):
+    push_domain(str(payload.url))
+    return {"ok": True}
+
+
+@router.get("/domains")
+async def list_domains(limit: int = 50):
+    return {"domains": get_domains(limit)}
+
+
+@router.get("/summary")
+async def get_summary():
+    return {"summary": build_summary(get_events(500))}

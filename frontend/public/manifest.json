@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "피스냥 - 피싱 스캠 사냥꾼",
+  "version": "1.0",
+  "description": "실시간으로 피싱 및 스캠 사이트를 탐지하고 차단합니다.",
+  "permissions": ["storage", "tabs", "activeTab", "scripting", "downloads"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}

@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Frontend (React/Vite)
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.*
+frontend/logs
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
+frontend/dist-ssr
+frontend/.vscode/*
+!frontend/.vscode/extensions.json
+frontend/.idea
+
+# dotenv
+.env
+.env.*
+
+# IDE/editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

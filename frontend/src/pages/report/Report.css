@@ -1,0 +1,163 @@
+/* 전체 페이지 배경 */
+.report-page-bg {
+  background: linear-gradient(135deg, #b8845f, #a67350);
+  min-height: 100vh;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  color: #3e2723;
+}
+
+/* 텍스트 선택 색상 */
+::selection {
+  background-color: #fde68a;
+}
+
+/* === 카드 스타일 === */
+.threat-card {
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #f5f5f4;
+  transition: all 0.2s;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+  position: relative;
+}
+
+/* 호버 효과: 테두리가 잘리지 않도록 z-index 추가 */
+.threat-card:hover {
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: scale(1.02);
+  border-color: #d6d3d1;
+  z-index: 10;
+}
+
+/* === 위협 유형 태그 스타일 === */
+.threat-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 피싱용 태그 색상 (Amber 계열) */
+.tag-phishing {
+  background-color: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+}
+
+/* 스캠용 태그 색상 (Rose 계열) */
+.tag-scam {
+  background-color: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fda4af;
+}
+
+/* 아이콘 색상 */
+.icon-phishing {
+  color: #f59e0b;
+}
+.icon-scam {
+  color: #f43f5e;
+}
+
+/* 스크롤바 커스텀 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+/* === 리스트 컨테이너 공통 스타일 === */
+.threat-list-container {
+  border-radius: 1.5rem; /* rounded-3xl */
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  position: relative;
+  overflow: hidden;
+  border-top-width: 6px;
+}
+
+/* === 피싱(Phishing) 전용 스타일 === */
+.list-phishing {
+  background: linear-gradient(
+    to bottom,
+    #fffbeb 0%,
+    rgba(255, 255, 255, 0.95) 150px
+  );
+  border-top-color: #f59e0b;
+}
+.list-phishing .list-header-icon {
+  background-color: #fcd34d;
+  color: #78350f;
+}
+
+/* === 스캠(Scam) 전용 스타일 === */
+.list-scam {
+  background: linear-gradient(
+    to bottom,
+    #fff1f2 0%,
+    rgba(255, 255, 255, 0.95) 150px
+  );
+  border-top-color: #f43f5e;
+}
+.list-scam .list-header-icon {
+  background-color: #fda4af;
+  color: #881337;
+}
+
+/* === 배경 워터마크 아이콘 === */
+.watermark-icon {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 180px;
+  height: 180px;
+  opacity: 0.05;
+  pointer-events: none;
+  transform: rotate(15deg);
+}
+
+.api-status {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff7ed;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.api-online {
+  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.15);
+}
+
+.api-offline {
+  box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2);
+}
+
+.report-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}

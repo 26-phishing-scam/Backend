@@ -39,6 +39,11 @@ async function addDomain(url) {
   const domains = await readStore(DOMAINS_KEY, []);
   const next = [domain, ...domains.filter((d) => d !== domain)].slice(0, MAX_DOMAINS);
   await writeStore(DOMAINS_KEY, next);
+  try {
+    await postDomain(url);
+  } catch {
+    // ignore API errors for domains
+  }
 }
 
 // ====== 이벤트 기록(content.js 메시지 기반 이벤트) ======
@@ -47,6 +52,11 @@ async function addEvent(entry) {
   const events = await readStore(EVENTS_KEY, []);
   const next = [entry, ...events].slice(0, MAX_EVENTS);
   await writeStore(EVENTS_KEY, next);
+  try {
+    await postStoredEvent(entry);
+  } catch {
+    // ignore API errors for events
+  }
 }
 
 // ====== 서버 분석 요청 ======
@@ -56,6 +66,30 @@ async function postEvent(payload) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
+  return response.json();
+}
+
+async function postStoredEvent(entry) {
+  const response = await fetch(`${API_BASE}/events`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(entry),
+  });
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
+  return response.json();
+}
+
+async function postDomain(url) {
+  const response = await fetch(`${API_BASE}/domains`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url }),
   });
   if (!response.ok) {
     throw new Error(`API error: ${response.status}`);
@@ -190,6 +224,12 @@ async function pushEvent(ev) {
     [EVENTS_KEY]: nextEvents,
     [DOMAINS_KEY]: nextDomains,
   });
+
+  try {
+    await postStoredEvent(ev);
+  } catch {
+    // ignore API errors for events
+  }
 }
 
 // chrome.downloads.onChanged:

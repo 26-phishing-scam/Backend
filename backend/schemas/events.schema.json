@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Phishing/Scam Event Batch Analyze",
+  "type": "object",
+  "required": ["events"],
+  "properties": {
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/batchEvent" }
+    }
+  },
+  "$defs": {
+    "baseEvent": {
+      "type": "object",
+      "required": ["type", "url"],
+      "properties": {
+        "type": { "type": "string" },
+        "url": { "type": "string", "format": "uri" }
+      },
+      "additionalProperties": false
+    },
+    "batchEvent": {
+      "oneOf": [
+        { "$ref": "#/$defs/pii_input" },
+        { "$ref": "#/$defs/payment" },
+        { "$ref": "#/$defs/download" },
+        { "$ref": "#/$defs/login" },
+        { "$ref": "#/$defs/password_input" },
+        { "$ref": "#/$defs/clipboard" },
+        { "$ref": "#/$defs/redirect" },
+        { "$ref": "#/$defs/form_submit" }
+      ]
+    },
+    "pii_input": {
+      "allOf": [
+        { "$ref": "#/$defs/baseEvent" },
+        {
+          "type": "object",
+          "required": ["ts", "type"],
+          "properties": {
+            "ts": { "type": "string", "format": "date-time" },
+            "type": { "const": "pii_input" },
+            "meta": {
+              "type": "object",
+              "properties": {
+                "fields": { "type": "array", "items": { "type": "string" } },
+                "count": { "type": "integer", "minimum": 0 },
+                "has_ssn": { "type": "boolean" },
+                "has_phone": { "type": "boolean" },
+                "has_email": { "type": "boolean" },
+                "has_address": { "type": "boolean" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "payment": {
+      "allOf": [
+        { "$ref": "#/$defs/baseEvent" },
+        {
+          "type": "object",
+          "required": ["ts", "type"],
+          "properties": {
+            "ts": { "type": "string", "format": "date-time" },
+            "type": { "const": "payment" },
+            "meta": {
+              "type": "object",
+              "properties": {
+                "amount": { "type": "number", "minimum": 0 },
+                "currency": { "type": "string" },
+                "card_bin": { "type": "string" },
+                "card_present": { "type": "boolean" },
+                "merchant_domain": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "download": {
+      "allOf": [
+        { "$ref": "#/$defs/baseEvent" },
+        {
+          "type": "object",
+          "required": ["ts", "type"],
+          "properties": {
+            "ts": { "type": "string", "format": "date-time" },
+            "type": { "const": "download" },
+            "meta": {
+              "type": "object",
+              "properties": {
+                "filename": { "type": "string" },
+                "file_ext": { "type": "string" },
+                "mime": { "type": "string" },
+                "size_bytes": { "type": "integer", "minimum": 0 },
+                "from_new_domain": { "type": "boolean" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "login": {
+      "allOf": [
+        { "$ref": "#/$defs/baseEvent" },
+        {
+          "type": "object",
+          "required": ["ts", "type"],
+          "properties": {
+            "ts": { "type": "string", "format": "date-time" },
+            "type": { "const": "login" },
+            "meta": {
+              "type": "object",
+              "properties": {
+                "username_present": { "type": "boolean" },
+                "username_field_name": { "type": "string" },
+                "form_action_domain": { "type": "string" },
+                "page_domain": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "password_input": {
+      "allOf": [
+        { "$ref": "#/$defs/baseEvent" },
+        {
+          "type": "object",
+          "required": ["ts", "type"],
+          "properties": {
+            "ts": { "type": "string", "format": "date-time" },
+            "type": { "const": "password_input" },
+            "meta": {
+              "type": "object",
+              "properties": {
+                "password_field_present": { "type": "boolean" },
+                "strength": { "type": "string" },
+                "form_action_domain": { "type": "string" },
+                "page_domain": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "clipboard": {
+      "allOf": [
+        { "$ref": "#/$defs/baseEvent" },
+        {
+          "type": "object",
+          "required": ["ts", "type"],
+          "properties": {
+            "ts": { "type": "string", "format": "date-time" },
+            "type": { "const": "clipboard" },
+            "meta": {
+              "type": "object",
+              "properties": {
+                "action": { "type": "string", "enum": ["read", "write"] },
+                "contains_crypto_address": { "type": "boolean" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "redirect": {
+      "allOf": [
+        { "$ref": "#/$defs/baseEvent" },
+        {
+          "type": "object",
+          "required": ["ts", "type"],
+          "properties": {
+            "ts": { "type": "string", "format": "date-time" },
+            "type": { "const": "redirect" },
+            "meta": {
+              "type": "object",
+              "properties": {
+                "chain_length": { "type": "integer", "minimum": 0 },
+                "final_domain": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "form_submit": {
+      "allOf": [
+        { "$ref": "#/$defs/baseEvent" },
+        {
+          "type": "object",
+          "required": ["ts", "type"],
+          "properties": {
+            "ts": { "type": "string", "format": "date-time" },
+            "type": { "const": "form_submit" },
+            "meta": {
+              "type": "object",
+              "properties": {
+                "form_action_domain": { "type": "string" },
+                "page_domain": { "type": "string" },
+                "has_file_upload": { "type": "boolean" },
+                "has_payment_fields": { "type": "boolean" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}
