@@ -148,22 +148,114 @@ export default function Report() {
 
   const downloadPDF = async () => {
     const element = dashboardRef.current;
-    if (!element) return;
+    if (!element) {
+      alert('오류: 리포트 영역을 찾을 수 없습니다.');
+      return;
+    }
 
     const btn = document.getElementById('save-btn');
     if (btn) btn.style.display = 'none';
 
+    const overlay = document.createElement('div');
+    Object.assign(overlay.style, {
+      position: 'fixed',
+      top: '0',
+      left: '0',
+      width: '100vw',
+      height: '100vh',
+      background: 'linear-gradient(135deg, #b8845f, #a67350)',
+      zIndex: '99999',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'white',
+    });
+
+    overlay.innerHTML = `
+      <style>@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }</style>
+      <div style="margin-bottom: 30px; animation: bounce 1s infinite;">
+         <img src="/icon.png" alt="로딩 중" style="width: 120px; height: 120px; object-fit: contain;" />
+      </div>
+      <div style="font-size: 24px; font-weight: bold;">리포트 생성 중...</div>
+      <div style="font-size: 16px; opacity: 0.9; margin-top: 10px; color: #FFF8E1;">잠시만 기다려주세요 🐾</div>
+    `;
+    document.body.appendChild(overlay);
+
+    const cloneContainer = document.createElement('div');
+    Object.assign(cloneContainer.style, {
+      position: 'fixed',
+      left: '0',
+      top: '0',
+      width: '1200px',
+      zIndex: '99998',
+      height: 'auto',
+      overflow: 'visible',
+    });
+    document.body.appendChild(cloneContainer);
+
     try {
-      const dataUrl = await toPng(element, {
-        cacheBust: true,
-        backgroundColor: '#B8845F',
-        pixelRatio: 2,
+      const clone = element.cloneNode(true);
+
+      clone.style.background = 'linear-gradient(135deg, #b8845f, #a67350)';
+      clone.style.width = '100%';
+      clone.style.height = 'auto';
+      clone.style.minHeight = '100vh';
+      clone.style.margin = '0';
+      clone.style.padding = '40px';
+      clone.style.boxSizing = 'border-box';
+      clone.style.overflow = 'visible';
+
+      const containers = clone.querySelectorAll('.threat-list-container');
+      containers.forEach((container) => {
+        container.style.height = 'auto';
+        container.style.maxHeight = 'none';
+        container.style.flex = 'none';
+        container.style.overflow = 'visible';
       });
 
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      pdf.addImage(dataUrl, 'PNG', 0, 0, 210, 297);
+      const scrollables = clone.querySelectorAll('.overflow-y-auto, .custom-scrollbar');
+      scrollables.forEach((el) => {
+        el.style.height = 'auto';
+        el.style.maxHeight = 'none';
+        el.style.overflow = 'visible';
+        el.style.flex = 'none';
+      });
+
+      cloneContainer.appendChild(clone);
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const height = clone.scrollHeight;
+      
+      const dataUrl = await toPng(clone, {
+        cacheBust: true,
+        width: 1200,
+        height: height,
+        pixelRatio: 2,
+        style: {
+           background: 'linear-gradient(135deg, #b8845f, #a67350)'
+        }
+      });
+
+      const pdfWidth = 210;
+      const pdfHeight = (height * pdfWidth) / 1200;
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [pdfWidth, pdfHeight],
+      });
+
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`스캠_리포트_${new Date().toLocaleDateString('ko-KR')}.pdf`);
+
+    } catch (error) {
+      console.error('PDF 생성 실패:', error);
+      alert('PDF 생성 중 오류가 발생했습니다.');
     } finally {
+      if (document.body.contains(cloneContainer)) document.body.removeChild(cloneContainer);
+      if (document.body.contains(overlay)) document.body.removeChild(overlay);
       if (btn) btn.style.display = 'flex';
     }
   };
