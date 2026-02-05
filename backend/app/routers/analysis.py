@@ -4,6 +4,7 @@ from typing import Any, Dict, List
 from fastapi import APIRouter
 
 from ..models import BatchAnalyzeRequest, BatchAnalyzeResponse, EventAnalyzeRequest, EventAnalyzeResponse
+from ..services.ai_client import fetch_ai_analysis
 from ..services.analyze import analyze_event_reasons
 
 router = APIRouter()
@@ -80,4 +81,5 @@ async def analyze_batch(req: BatchAnalyzeRequest):
         "events": events_out,
     }
 
-    return BatchAnalyzeResponse(summary=summary)
+    phishing = await fetch_ai_analysis(str(req.url))
+    return BatchAnalyzeResponse(summary=summary, phishing=phishing)

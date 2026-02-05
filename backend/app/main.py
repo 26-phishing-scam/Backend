@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .core.config import get_cors_settings
+from .routers.ai import router as ai_router
 from .routers.analysis import router as analysis_router
 from .routers.meta import router as meta_router
 from .routers.store import router as store_router
@@ -35,5 +36,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 app.include_router(meta_router)
+app.include_router(ai_router)
 app.include_router(analysis_router)
 app.include_router(store_router)

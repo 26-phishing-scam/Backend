@@ -46,6 +46,7 @@ export default function Popup() {
     if (type === 'pii_input') return '개인정보 입력 시도';
     if (type === 'payment') return '결제 시도';
     if (type === 'download') return '다운로드 시도';
+    if (type === 'phishing' || type === 'ai_phishing') return 'AI phishing';
     return '이상 행위 감지';
   };
 

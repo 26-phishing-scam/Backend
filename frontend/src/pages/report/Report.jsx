@@ -36,6 +36,8 @@ export default function Report() {
   /* ================= Utils ================= */
 
   const EVENT_LABEL = {
+    phishing: 'AI phishing detected',
+    ai_phishing: 'AI phishing detected',
     pii_input: '개인정보 입력',
     pii_fields_present: '개인정보 입력 감지',
     multiple_pii_fields: '다수 개인정보 입력',
@@ -65,7 +67,7 @@ export default function Report() {
     form_action_domain_mismatch: '폼 도메인 불일치',
   };
 
-  const labelOf = (code) => EVENT_LABEL[code] || '의심 활동';
+  const labelOf = (code) => EVENT_LABEL[code] || code || 'unknown';
 
   const formatTime = (iso) => {
     if (!iso) return '';

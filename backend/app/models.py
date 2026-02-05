@@ -147,6 +147,20 @@ class EventAnalyzeResponse(BaseModel):
     reasons: List[str]
 
 
+AnalyzeStatus = Literal["SAFE", "CAUTION", "DANGER", "UNKNOWN"]
+DetectionSource = Literal["WHITELIST", "BLACKLIST", "AI"]
+
+
+class UrlAnalyzeRequest(BaseModel):
+    url: HttpUrl
+
+
+class UrlAnalyzeResponse(BaseModel):
+    status: AnalyzeStatus
+    detection_source: DetectionSource
+    reports: List[str]
+
+
 class PiiInputBatchEvent(PiiInputEvent):
     ts: datetime
 
@@ -195,11 +209,13 @@ BatchEvent = Annotated[
 
 
 class BatchAnalyzeRequest(BaseModel):
+    url: HttpUrl
     events: List[BatchEvent]
 
 
 class BatchAnalyzeResponse(BaseModel):
     summary: Dict[str, Any]
+    phishing: UrlAnalyzeResponse
 
 
 class StoredEvent(BaseModel):
