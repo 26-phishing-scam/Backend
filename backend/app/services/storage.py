@@ -1,7 +1,8 @@
 from collections import Counter
-from datetime import datetime
 from typing import Any, Dict, List
 from urllib.parse import urlparse
+
+from ..core.time import utc_now_iso
 
 MAX_EVENTS_STORE = 500
 MAX_DOMAINS_STORE = 200
@@ -26,7 +27,7 @@ def push_domain(url: str) -> None:
     domain = _domain_from_url(url)
     if not domain:
         return
-    now_iso = datetime.utcnow().isoformat()
+    now_iso = utc_now_iso()
     existing = [d for d in DOMAINS_STORE if d.get("domain") != domain]
     DOMAINS_STORE.clear()
     DOMAINS_STORE.append({"domain": domain, "ts": now_iso})

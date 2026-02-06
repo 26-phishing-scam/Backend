@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 
 from fastapi import APIRouter
 
+from ..core.time import to_utc_iso
 from ..models import BatchAnalyzeRequest, BatchAnalyzeResponse, EventAnalyzeRequest, EventAnalyzeResponse
 from ..services.ai_client import fetch_ai_analysis
 from ..services.analyze import analyze_event_reasons
@@ -53,7 +54,7 @@ async def analyze_batch(req: BatchAnalyzeRequest):
 
         events_out.append(
             {
-                "ts": event.ts.isoformat(),
+                "ts": to_utc_iso(event.ts),
                 "type": event.type,
                 "url": str(event.url),
                 "reasons": reasons,

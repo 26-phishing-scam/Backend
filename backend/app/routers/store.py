@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from fastapi import APIRouter
 
 from ..models import DomainIn, StoredEvent
+from ..core.time import to_utc_iso, utc_now_iso
 from ..services.ai_client import fetch_ai_analysis
 from ..services.storage import build_summary, get_domains, get_events, push_domain, push_event
 
@@ -12,7 +11,7 @@ router = APIRouter()
 @router.post("/events")
 async def store_event(ev: StoredEvent):
     item = {
-        "ts": ev.ts.isoformat(),
+        "ts": to_utc_iso(ev.ts),
         "type": ev.type,
         "url": str(ev.url),
         "meta": ev.meta,
@@ -39,7 +38,7 @@ async def store_domain(payload: DomainIn):
     if analysis and analysis.get("status") in {"DANGER", "CAUTION"}:
         push_event(
             {
-                "ts": datetime.utcnow().isoformat(),
+                "ts": utc_now_iso(),
                 "type": "phishing",
                 "url": str(payload.url),
                 "meta": {
